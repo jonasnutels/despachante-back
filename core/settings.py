@@ -2,7 +2,9 @@ import os
 from pathlib import Path
 import environ
 
+# ===========================
 # Caminho base do projeto
+# ===========================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Inicializa django-environ
@@ -20,10 +22,16 @@ if env_file.exists():
 # ===========================
 SECRET_KEY = env('SECRET_KEY', default='chave-insegura-local')
 
-# DEBUG automático (True local, False no Fly)
+# DEBUG automático (True local, False produção)
 DEBUG = env.bool('DEBUG', default=True if env_file.exists() else False)
 
-ALLOWED_HOSTS = ['.fly.dev', 'localhost', '127.0.0.1']
+# Hosts permitidos
+ALLOWED_HOSTS = [
+    '.fly.dev',
+    'localhost',
+    '127.0.0.1',
+    'jonasnutels.pythonanywhere.com',  # domínio PythonAnywhere
+]
 
 # ===========================
 # Aplicativos instalados
@@ -36,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'usuarios',  # seu app de usuários
+    'usuarios',  # app de usuários
 ]
 
 # ===========================
@@ -44,7 +52,7 @@ INSTALLED_APPS = [
 # ===========================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # para servir staticfiles no Fly
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # serve arquivos estáticos
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -52,11 +60,21 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-CSRF_TRUSTED_ORIGINS = [
-    'https://django-despachante.fly.dev',
-]
-ROOT_URLCONF = 'core.urls'
 
+# Domínios confiáveis para CSRF
+CSRF_TRUSTED_ORIGINS = [
+    'https://jonasnutels.pythonanywhere.com',
+]
+
+# ===========================
+# URLs e WSGI
+# ===========================
+ROOT_URLCONF = 'core.urls'
+WSGI_APPLICATION = 'core.wsgi.application'
+
+# ===========================
+# Templates
+# ===========================
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -73,8 +91,6 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'core.wsgi.application'
-
 # ===========================
 # Banco de Dados
 # ===========================
@@ -88,7 +104,7 @@ DATABASES = {
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
 # ===========================
-# Password validation
+# Validação de senha
 # ===========================
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -106,16 +122,19 @@ USE_I18N = True
 USE_TZ = True
 
 # ===========================
-# Arquivos estáticos
+# Arquivos estáticos e mídia
 # ===========================
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Whitenoise para servir estáticos no Fly
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# WhiteNoise para servir estáticos comprimidos
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ===========================
-# Config REST Framework
+# Django REST Framework
 # ===========================
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -131,4 +150,3 @@ REST_FRAMEWORK = {
 # Configurações adicionais
 # ===========================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
